@@ -1,0 +1,113 @@
+.TaskManager {
+    position: relative;
+    padding: 20px;
+}
+.Task {
+    position: relative;
+    border-top: 1px solid white;
+    border-bottom: 1px solid white;
+    margin-bottom: 30px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    display: flex;
+}
+.Task .Status {
+    display: flex;
+    justify-content: center;
+    margin-right: 10px;
+}
+.Task .Status input {
+    appearance: none;
+    margin: 5px;
+    margin-top: 7px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid gray;
+    border-radius: 50%;
+    transition: background-color 100ms;
+    content: '';
+}
+.Task .Status input:hover {
+    background-color: gray;
+}
+.Task .Status input:checked {
+    background-color: orange;
+    color: white;
+    background: orange;
+    opacity: 1;
+}
+.TaskManager .Heading {
+    padding-bottom: 50px;
+    font-size: 32pt;
+    color: orange;
+}
+
+.Task .options {
+    position: absolute;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 7px;
+}
+.options * {
+    margin: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.options .del-icon:hover {
+    fill: red;
+    cursor: pointer;
+}
+.options .exp-icon:hover {
+    cursor: pointer;
+}
+
+.AddTask {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    right: 10px;
+}
+.AddTask * {
+    margin: 5px;
+    fill: orange;
+    color: orange;
+    cursor: pointer;
+}
+
+.Task .info {
+    display: flex;
+    flex-direction: column;
+}
+.info input {
+    background-color: black;
+    color: white;
+    outline: none;
+}
+.Task input#title {
+    font-size: 20pt;
+    font-weight: 700;
+}
+.Task input#description {
+    font-size: 15pt;
+    font-weight: 500;
+}
+.Task select#time {
+    background-color: black;
+    appearance: none;
+    font-size: 12pt;
+}
+
+.TaskManager .prompt {
+    color: gray;
+}
+
+.TaskConstructor .add {
+    transition: fill 100ms;
+}
+.TaskConstructor .add:hover {
+    cursor: pointer;
+    fill: orange;
+}
