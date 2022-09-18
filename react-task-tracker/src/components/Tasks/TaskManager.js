@@ -1,136 +1,55 @@
 import React, { useState } from 'react';
 import Task from './Task'
-import TaskConstructor from './TaskConstructor'
-import {ENV_VAR} from '../../App';
+import TaskConstructor from './TaskConstructor';
 
 
 //tasks manager class
 class taskSync {
-    call
-    async get(callback)
-    {
-        this.offset = 1;
+    constructor() {
+        this.offset = 0;
         this.tasks = [];
         this.updateState = true;
-        fetch(`http://localhost:5000?uname=${ENV_VAR.uname}&pass=${ENV_VAR.pass}&qid=104`).then(res => {
-            res.json().then(json => {
-                json.forEach(task => {
-                    this.tasks.push({
-                        id : this.offset,
-                        title : task.title,
-                        description : task.description,
-                        timestamp : task.timestamp,
-                        duration : task.duration,
-                        userid : task.userid,
-                        gid : task.id,
-                        hops : task.hops,
-                        status : task.status,
-                        state : task.state
-                    });
-                    this.offset++;
-                });
-                callback();
-                //console.log(this.tasks);
-            });
-        });
-        
+        // this.db = getFirestore(app);
+    }
+    get(callback)
+    {
+        // getDocs(collection(this.db, "tasks"))
+        // .then(snapshot => {
+        //     this.tasks = snapshot.docs.map(e => e.data());
+        //     if(this.tasks.length > 0)
+        //         this.offset = this.tasks[this.tasks.length - 1].id;
+        //     callback();
+        // })
     }
     addTask(title, description, duration)
     {
-        this.tasks.push({
-            id : this.offset,
+        let data = {
+            id : this.offset++,
             title : title,
             description : description,
             timestamp : new Date().getTime(),
             duration : duration,
-            userid : '',
-            gid : '',
-            hops : 0,
             status : 'pending',
-            state : 'active'
-        });
-        this.offset++;
-        fetch(`http://localhost:5000?uname=${ENV_VAR.uname}&pass=${ENV_VAR.pass}&qid=102`, {
-            method : 'POST',
-            headers : {
-                'Content-Type' : 'application/json'
-            },
-            body : JSON.stringify({
-                title : title,
-                description : description,
-                duration : duration
-            })
-        }).then(res => {
-            res.json().then(json => {
-                this.tasks.forEach(task => {
-                    if(task.id == this.offset - 1)
-                    {
-                        task.gid = json.id;
-                        task.userid = json.userid;
-                    }
-                });
-            })
-        });
+        }
+        this.tasks.push(data);
     }
     remTask(id)
     {
         let tsk = this.tasks.filter(task => task.id == id)[0];
-        console.log('deleting task', tsk);
         this.tasks = this.tasks.filter(task => task.id != id);
-        fetch(`http://localhost:5000?uname=${ENV_VAR.uname}&pass=${ENV_VAR.pass}&tid=${tsk.gid}&activity=${tsk.duration}&qid=103`, {
-            method : 'DELETE'
-        });
     }
     completeTask(id)
     {
-        this.tasks.forEach(task => {
-            if(task.id == id)
-            {
-                task.status = 'completed';
-                fetch(`http://localhost:5000?uname=${ENV_VAR.uname}&pass=${ENV_VAR.pass}&tid=${task.gid}&activity=${task.duration}&qid=105`, {
-                    method : 'POST'
-                });
-                this.tasks = this.tasks.filter(task => task.id != id);
-            }
-        });
+        this.remTask(id)
     }
 }
 
 let tm = new taskSync();
 
-
+var inSync = false;
 const TaskManager = () => {
 
     var [tasks, getsetTasks] = useState(tm.tasks);
-    var [render, setRender] = useState(1);
-
-    const onReassign = (id) => {
-        console.log('reassigining tasks');
-        let task = tm.tasks.filter(task => task.id == id)[0];
-        tm.tasks = tm.tasks.filter(task => task.id != id)
-        tasks = tm.tasks;
-        console.log(tasks, tm.tasks, task);
-        fetch(`http://localhost:5000?uname=${ENV_VAR.uname}&pass=${ENV_VAR.pass}&tid=${task.gid}&activity=${task.duration}&qid=106`, {
-            method : 'POST'
-        });
-        getsetTasks(task);
-    }
-    const updateReassign = () => {
-        if(tm.updateState)
-        {
-            setInterval(() => {
-                tm.tasks.forEach(task => {
-                    if(task.timestamp + task.duration <= new Date().getTime())
-                    {
-                        //reassign task
-                        onReassign(task.id);
-                    }
-                });
-                tm.updateState = false;
-            }, 1000*60);
-        }
-    }
-    updateReassign();
 
     const onComplete = (id) => {
         tm.completeTask(id);
@@ -162,8 +81,20 @@ const TaskManager = () => {
     //taskConstructor manager
     let [taskConstructor, taskConstructorManager] = useState(false);
     const onConstructorDelete = () => {
-        taskConstructorManager(taskConstructor? false : false);
+        taskConstructorManager(false);
     }
+
+
+    // if(!inSync)
+    // {
+    //     inSync = true;
+    //     tm.get(() => {
+    //         tasks = tm.tasks;
+    //         getsetTasks(tasks);
+    //         onConstructorDelete();
+    //         console.log(tasks, tm.offset)
+    //     })
+    // }
 
 
 
@@ -181,7 +112,7 @@ const TaskManager = () => {
             {taskConstructor? (<TaskConstructor onDelete={onConstructorDelete} onCreate={addTask}/>) : (
                 <div onClick={() => {
                     //setting toggle for task constructor
-                    taskConstructorManager(taskConstructor? true : true);
+                    taskConstructorManager(true);
                 }} className="AddTask">
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" className="bi bi-plus-square-fill" viewBox="0 0 16 16">
                         <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0z"/>
